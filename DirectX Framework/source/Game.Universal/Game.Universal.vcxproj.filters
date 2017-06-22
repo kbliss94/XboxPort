@@ -43,6 +43,10 @@
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="MoodySprite.cpp" />
     <ClCompile Include="SpriteDemoManager.cpp" />
+    <ClCompile Include="Bar.cpp" />
+    <ClCompile Include="BarManager.cpp" />
+    <ClCompile Include="Chunk.cpp" />
+    <ClCompile Include="ChunkManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -54,6 +58,10 @@
     <ClInclude Include="Field.h" />
     <ClInclude Include="MoodySprite.h" />
     <ClInclude Include="SpriteDemoManager.h" />
+    <ClInclude Include="Bar.h" />
+    <ClInclude Include="BarManager.h" />
+    <ClInclude Include="Chunk.h" />
+    <ClInclude Include="ChunkManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

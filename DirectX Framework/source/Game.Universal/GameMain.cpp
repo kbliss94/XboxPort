@@ -46,9 +46,16 @@ namespace DirectXGame
 		mComponents.push_back(ballManager);		
 
 		///////////
+		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera);
+		chunkManager->SetActiveField(fieldManager->ActiveField());
+		mComponents.push_back(chunkManager);
 
-		/*auto barManager = make_shared<BarManager>(mDeviceResources, camera);
-		mComponents.push_back(barManager);*/
+		//auto barManager = make_shared<BarManager>(mDeviceResources, camera);
+		//barManager->SetActiveField(fieldManager->ActiveField());
+		//mComponents.push_back(barManager);
+		mBarManager = make_shared<BarManager>(mDeviceResources, camera);
+		mBarManager->SetActiveField(fieldManager->ActiveField());
+
 
 		//const int32_t spriteRowCount = 12;
 		//const int32_t spriteColumnCount = 15;
@@ -94,6 +101,19 @@ namespace DirectXGame
 			{
 				CoreApplication::Exit();
 			}
+
+			//Bar movement
+			if (mKeyboard->IsKeyHeldDown(Keys::D))
+			{
+				mBarManager->MoveRight();
+				mBarManager->Update(mTimer);
+			}
+
+			if (mKeyboard->IsKeyHeldDown(Keys::A))
+			{
+				mBarManager->MoveLeft();
+				mBarManager->Update(mTimer);
+			}
 		});
 	}
 
@@ -129,6 +149,8 @@ namespace DirectXGame
 				drawableComponent->Render(mTimer);
 			}
 		}
+
+		mBarManager->Render(mTimer);
 
 		return true;
 	}

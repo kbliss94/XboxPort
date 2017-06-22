@@ -5,7 +5,7 @@
 
 namespace DirectXGame
 {
-	class Field final
+	class Field 
 	{
 	public:
 		Field(const DirectX::XMFLOAT2& position, const DirectX::XMFLOAT2& size, const DirectX::XMFLOAT4& color = DirectX::XMFLOAT4(&DirectX::Colors::White[0]));
@@ -19,7 +19,7 @@ namespace DirectXGame
 		const DirectX::XMFLOAT4& Color() const;
 		void SetColor(const DirectX::XMFLOAT4& color);
 
-	private:
+	protected:
 		DirectX::XMFLOAT2 mPosition;
 		DirectX::XMFLOAT2 mSize;
 		DirectX::XMFLOAT4 mColor;

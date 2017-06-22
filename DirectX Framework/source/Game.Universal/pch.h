@@ -52,5 +52,7 @@
 #include "MoodySprite.h"
 #include "SpriteDemoManager.h"
 
-//#include "Bar.h"
-//#include "BarManager.h"
+#include "Bar.h"
+#include "BarManager.h"
+#include "Chunk.h"
+#include "ChunkManager.h"
