@@ -27,10 +27,10 @@ namespace DirectXGame
 		return mRadius;
 	}
 
-	void Ball::SetRadius(const float radius)
-	{
-		mRadius = radius;
-	}
+	//void Ball::SetRadius(const float radius)
+	//{
+	//	mRadius = radius;
+	//}
 
 	const XMFLOAT4& Ball::Color() const
 	{

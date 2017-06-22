@@ -28,7 +28,7 @@ namespace DirectXGame
 		void SetTransform(const DX::Transform2D& transform);
 
 		float Radius() const;
-		void SetRadius(const float radius);
+		//void SetRadius(const float radius);
 
 		const DirectX::XMFLOAT4& Color() const;
 		void SetColor(const DirectX::XMFLOAT4& color);

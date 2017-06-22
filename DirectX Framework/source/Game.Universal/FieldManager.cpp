@@ -177,10 +177,16 @@ namespace DirectXGame
 			VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y + halfSize.y, 0.0f, 1.0f)),
 
 			// Lower-Right
-			VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
+			VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y + (halfSize.y / 2), 0.0f, 1.0f)),
 
 			// Lower-Left
-			VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
+			VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y + (halfSize.y / 2), 0.0f, 1.0f)),
+
+			//// Lower-Right
+			//VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
+
+			//// Lower-Left
+			//VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
 		};
 
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();

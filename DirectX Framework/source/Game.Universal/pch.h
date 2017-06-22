@@ -51,3 +51,6 @@
 #include "FieldManager.h"
 #include "MoodySprite.h"
 #include "SpriteDemoManager.h"
+
+//#include "Bar.h"
+//#include "BarManager.h"

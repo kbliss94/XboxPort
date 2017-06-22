@@ -23,6 +23,10 @@ namespace DirectXGame
 		DirectX::XMFLOAT2 mPosition;
 		DirectX::XMFLOAT2 mSize;
 		DirectX::XMFLOAT4 mColor;
+
+		//actually this would be constant/the same for every field chunk
+		//DirectX::XMFLOAT2 mHeight;
+		//DirectX::XMFLOAT2 mWidth;
 	};
 }
 

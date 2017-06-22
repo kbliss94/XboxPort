@@ -45,12 +45,17 @@ namespace DirectXGame
 		ballManager->SetActiveField(fieldManager->ActiveField());
 		mComponents.push_back(ballManager);		
 
-		const int32_t spriteRowCount = 12;
-		const int32_t spriteColumnCount = 15;
-		auto spriteDemoManager = make_shared<SpriteDemoManager>(mDeviceResources, camera, spriteRowCount, spriteColumnCount);		
-		const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
-		spriteDemoManager->SetPositon(center);
-		mComponents.push_back(spriteDemoManager);
+		///////////
+
+		/*auto barManager = make_shared<BarManager>(mDeviceResources, camera);
+		mComponents.push_back(barManager);*/
+
+		//const int32_t spriteRowCount = 12;
+		//const int32_t spriteColumnCount = 15;
+		//auto spriteDemoManager = make_shared<SpriteDemoManager>(mDeviceResources, camera, spriteRowCount, spriteColumnCount);		
+		//const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
+		//spriteDemoManager->SetPositon(center);
+		//mComponents.push_back(spriteDemoManager);
 
 		mTimer.SetFixedTimeStep(true);
 		mTimer.SetTargetElapsedSeconds(1.0 / 60);

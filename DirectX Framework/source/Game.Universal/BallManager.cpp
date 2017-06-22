@@ -260,19 +260,28 @@ namespace DirectXGame
 		
 		uniform_real_distribution<float> rotationDistribution(0, XM_2PI);
 
-		const float minRadius = 0.1f;
-		const float maxRadius = 5.0f;
-		uniform_real_distribution<float> radiusDistribution(minRadius, maxRadius);
+		//const float minRadius = 4.0f;
+		//const float maxRadius = 5.0f;
+		//uniform_real_distribution<float> radiusDistribution(minRadius, maxRadius);
 
-		const uint32_t ballCount = 30;
-		for (uint32_t i = 0; i < ballCount; ++i)
-		{			
-			const float rotation = rotationDistribution(generator);
-			const float radius = radiusDistribution(generator);
-			const XMFLOAT4 color = ColorHelper::RandomColor();
-			const XMFLOAT2 velocity(velocityDistribution(generator), velocityDistribution(generator));
-			const bool isSolid = isSolidDistribution(generator) < 1;
-			mBalls.emplace_back(make_shared<Ball>(*this, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
-		}
+		//since there's only one ball:
+		const float rotation = rotationDistribution(generator);
+		const float radius = 1.5f;
+		const XMFLOAT4 color = ColorHelper::RandomColor();
+		const XMFLOAT2 velocity(velocityDistribution(generator), velocityDistribution(generator));
+		const bool isSolid = true;
+		mBalls.emplace_back(make_shared<Ball>(*this, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
+
+
+		//const uint32_t ballCount = 1;
+		//for (uint32_t i = 0; i < ballCount; ++i)
+		//{			
+		//	const float rotation = rotationDistribution(generator);
+		//	const float radius = radiusDistribution(generator);
+		//	const XMFLOAT4 color = ColorHelper::RandomColor();
+		//	const XMFLOAT2 velocity(velocityDistribution(generator), velocityDistribution(generator));
+		//	const bool isSolid = isSolidDistribution(generator) < 1;
+		//	mBalls.emplace_back(make_shared<Ball>(*this, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
+		//}
 	}
 }
