@@ -165,10 +165,8 @@ namespace DirectXGame
 
 		for (auto it = mChunks.begin(); it != mChunks.end(); ++it)
 		{
-			//if ((ballPosition.y + ballRadius) >= ((*it)->Position().y - mChunkHeight))
 			if ((ballPosition.y + ballRadius + 57) >= ((*it)->Position().y - mChunkHeight))
 			{
-				//if (((*it)->Position().x) <= (ballPosition.x - ballRadius) && (ballPosition.x + ballRadius) <= ((*it)->Position().x + mChunkWidth))
 				if (((*it)->Position().x) <= ballPosition.x && ballPosition.x <= ((*it)->Position().x + mChunkWidth))
 				{
 					hitPosition = ((*it)->Position().y - mChunkHeight) - 58;

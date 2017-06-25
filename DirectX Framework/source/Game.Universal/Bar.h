@@ -29,6 +29,7 @@ namespace DirectXGame
 
 		const DirectX::XMFLOAT2& Position() const;
 		const float& Radius() const;
+		const float& Width() const;
 
 		const DirectX::XMFLOAT4& Color() const;
 		void SetColor(const DirectX::XMFLOAT4& color);

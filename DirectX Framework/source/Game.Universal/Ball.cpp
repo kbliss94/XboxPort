@@ -103,13 +103,23 @@ namespace DirectXGame
 			hasCollidedWithField = true;
 		}
 		//checking to see if the ball has collided with the bar -30
-
-		//else if (position.y - mRadius <= bottomSide)
+		//else if (position.y - mRadius <= -40)
 		//{
-		//	mVelocity.y *= -1;
-		//	updatedPosition.y = bottomSide + mRadius;
-		//	hasCollidedWithField = true;
+		//	float barCollision = mBarManager.HandleBallCollision(position, mRadius);
+
+		//	if (barCollision != 0.0f)
+		//	{
+		//		mVelocity.y *= -1;
+		//		updatedPosition.y = barCollision;
+		//		hasCollidedWithField = true;
+		//	}
 		//}
+		else if (position.y - mRadius <= bottomSide)
+		{
+			mVelocity.y *= -1;
+			updatedPosition.y = bottomSide + mRadius;
+			hasCollidedWithField = true;
+		}
 		//checking to see if the ball has collided with a chunk
 		else if (position.y + mRadius >= 22)
 		{

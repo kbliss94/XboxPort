@@ -32,6 +32,11 @@ namespace DirectXGame
 		return mRadius;
 	}
 
+	const float& Bar::Width() const
+	{
+		return mWidth;
+	}
+
 	const XMFLOAT4& Bar::Color() const
 	{
 		return mColor;

@@ -159,10 +159,17 @@ namespace DirectXGame
 
 	float BarManager::HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius)
 	{
-		UNREFERENCED_PARAMETER(ballPosition);
-		UNREFERENCED_PARAMETER(ballRadius);
+		float hitPosition = 0.0f;
 
-		return 0.0f;
+		if ((ballPosition.y - ballRadius + 57) <= mBar->Position().y)
+		{
+			if (mBar->Position().x <= ballPosition.x && ballPosition.x <= (mBar->Position().x + (mBar->Width() * 2)))
+			{
+				hitPosition = mBar->Position().y - 54;
+			}
+		}
+
+		return hitPosition;
 	}
 
 	void BarManager::DrawBar(const Bar & bar)
