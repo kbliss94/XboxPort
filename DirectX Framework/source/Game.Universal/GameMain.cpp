@@ -41,28 +41,18 @@ namespace DirectXGame
 		auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
 		mComponents.push_back(fieldManager);
 
-		auto ballManager = make_shared<BallManager>(mDeviceResources, camera);
-		ballManager->SetActiveField(fieldManager->ActiveField());
-		mComponents.push_back(ballManager);		
-
 		///////////
 		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera);
 		chunkManager->SetActiveField(fieldManager->ActiveField());
 		mComponents.push_back(chunkManager);
 
-		//auto barManager = make_shared<BarManager>(mDeviceResources, camera);
-		//barManager->SetActiveField(fieldManager->ActiveField());
-		//mComponents.push_back(barManager);
 		mBarManager = make_shared<BarManager>(mDeviceResources, camera);
 		mBarManager->SetActiveField(fieldManager->ActiveField());
 
-
-		//const int32_t spriteRowCount = 12;
-		//const int32_t spriteColumnCount = 15;
-		//auto spriteDemoManager = make_shared<SpriteDemoManager>(mDeviceResources, camera, spriteRowCount, spriteColumnCount);		
-		//const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
-		//spriteDemoManager->SetPositon(center);
-		//mComponents.push_back(spriteDemoManager);
+		auto ballManager = make_shared<BallManager>(mDeviceResources, camera, *chunkManager, *mBarManager);
+		ballManager->SetActiveField(fieldManager->ActiveField());
+		mComponents.push_back(ballManager);
+		//////////
 
 		mTimer.SetFixedTimeStep(true);
 		mTimer.SetTargetElapsedSeconds(1.0 / 60);

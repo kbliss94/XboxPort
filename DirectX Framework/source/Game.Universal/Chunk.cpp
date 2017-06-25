@@ -1,27 +1,90 @@
 #include "pch.h"
 #include "Chunk.h"
-#include "ChunkManager.h"
 
 using namespace DirectX;
+using namespace DX;
 
 namespace DirectXGame
 {
-	Chunk::Chunk(const DirectX::XMFLOAT2& position, const DirectX::XMFLOAT2& size, const DirectX::XMFLOAT4& color, 
-		ChunkManager& chunkManager) :
-		Field(position, size, color), mChunkManager(chunkManager)
+	Chunk::Chunk(ChunkManager& chunkManager, const DX::Transform2D& transform, float radius, const DirectX::XMFLOAT4& color, const DirectX::XMFLOAT2& velocity) :
+		mChunkManager(chunkManager), mTransform(transform), mRadius(radius),
+		mColor(color), mVelocity(velocity)
 	{
-
 	}
 
-	//void Chunk::Update(const DX::StepTimer& timer)
-	//{
-	//	double elapsedTime = timer.GetElapsedSeconds();
+	const Transform2D& Chunk::Transform() const
+	{
+		return mTransform;
+	}
 
-	//	mPosition.x += mVelocity.x * static_cast<float>(elapsedTime);
-	//	mPosition.y += mVelocity.y * static_cast<float>(elapsedTime);
+	void Chunk::SetTransform(const Transform2D & transform)
+	{
+		mTransform = transform;
+	}
 
-	//	SetPosition(mPosition);
+	const XMFLOAT2& Chunk::Position() const
+	{
+		return mTransform.Position();
+	}
 
-	//	CheckForFieldCollision();
-	//}
+	const float& Chunk::Radius() const
+	{
+		return mRadius;
+	}
+
+	const XMFLOAT4& Chunk::Color() const
+	{
+		return mColor;
+	}
+
+	void Chunk::SetColor(const XMFLOAT4& color)
+	{
+		mColor = color;
+	}
+
+	const XMFLOAT2& Chunk::Velocity() const
+	{
+		return mVelocity;
+	}
+
+	void Chunk::SetVelocity(const XMFLOAT2& velocity)
+	{
+		mVelocity = velocity;
+	}
+
+	void Chunk::Update(const StepTimer& timer)
+	{
+		double elapsedTime = timer.GetElapsedSeconds();
+
+		XMFLOAT2 position = mTransform.Position();
+		position.x += mVelocity.x * static_cast<float>(elapsedTime);
+		position.y += mVelocity.y * static_cast<float>(elapsedTime);
+
+		mTransform.SetPosition(position);
+		CheckForFieldCollision();
+	}
+
+	void Chunk::CheckForFieldCollision()
+	{
+		//const auto& position = mTransform.Position();
+		//XMFLOAT2 updatedPosition = position;
+		//bool hasCollidedWithField = false;
+
+		//if (position.x - mWidth <= mFieldLeftSide)
+		//{
+		//	updatedPosition.x = mFieldLeftSide + mWidth;
+		//	hasCollidedWithField = true;
+		//}
+
+		//if (position.x + mWidth >= mFieldRightSide)
+		//{
+		//	updatedPosition.x = mFieldRightSide - mWidth;
+		//	hasCollidedWithField = true;
+		//}
+
+		//if (hasCollidedWithField)
+		//{
+		//	mTransform.SetPosition(updatedPosition);
+		//}
+	}
 }

@@ -4,48 +4,36 @@
 
 using namespace std;
 using namespace DirectX;
-using namespace SimpleMath;
 using namespace DX;
 
 namespace DirectXGame
 {
+	const uint32_t ChunkManager::CircleResolution = 32;
+	const uint32_t ChunkManager::SolidCircleVertexCount = (ChunkManager::CircleResolution + 1) * 2;
+
 	ChunkManager::ChunkManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera) :
-		DrawableGameComponent(deviceResources, camera),
-		mLoadingComplete(false), mIndexCount(0)
+		DrawableGameComponent(deviceResources, camera), mLoadingComplete(false)
 	{
 		CreateDeviceDependentResources();
 	}
 
-	shared_ptr<Field> ChunkManager::ActiveField() const
+	std::shared_ptr<Field> ChunkManager::ActiveField() const
 	{
 		return mActiveField;
 	}
 
-	void ChunkManager::SetActiveField(const std::shared_ptr<Field>& field)
+	void ChunkManager::SetActiveField(const shared_ptr<Field>& field)
 	{
 		mActiveField = field;
 	}
 
 	void ChunkManager::CreateDeviceDependentResources()
 	{
-		// Create a field
-		const XMFLOAT2 position = Vector2Helper::Zero;
-		const XMFLOAT2 size(95, 80);
-		const XMFLOAT4 color(&Colors::AntiqueWhite[0]);
-
-		//Create a chunk
-		const XMFLOAT2 chunkSize(5, 10);
-		const XMFLOAT4 barColor(&Colors::HotPink[0]);
-		const XMFLOAT2 barPosition(0, 0);
-
-		mActiveField = make_shared<Field>(position, size, color);
-		mChunk = make_shared<Chunk>(barPosition, chunkSize, barColor, *this);
-
 		auto loadVSTask = ReadDataAsync(L"ShapeRendererVS.cso");
 		auto loadPSTask = ReadDataAsync(L"ShapeRendererPS.cso");
 
 		// After the vertex shader file is loaded, create the shader and input layout.
-		auto createVSTask = loadVSTask.then([this](const vector<byte>& fileData) {
+		auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
 			ThrowIfFailed(
 				mDeviceResources->GetD3DDevice()->CreateVertexShader(
 					&fileData[0],
@@ -77,7 +65,7 @@ namespace DirectXGame
 		});
 
 		// After the pixel shader file is loaded, create the shader and constant buffer.
-		auto createPSTask = loadPSTask.then([this](const vector<byte>& fileData) {
+		auto createPSTask = loadPSTask.then([this](const std::vector<byte>& fileData) {
 			ThrowIfFailed(
 				mDeviceResources->GetD3DDevice()->CreatePixelShader(
 					&fileData[0],
@@ -97,32 +85,13 @@ namespace DirectXGame
 			);
 		});
 
-		(createPSTask && createVSTask).then([this]() {
-			// Create a vertex buffer for rendering a box
-			D3D11_BUFFER_DESC vertexBufferDesc = { 0 };
-			const uint32_t boxVertexCount = 4;
-			vertexBufferDesc.ByteWidth = sizeof(VertexPosition) * boxVertexCount;
-			vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-			vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, nullptr, mVertexBuffer.ReleaseAndGetAddressOf()));
+		auto createVerticesAndBallsTask = (createPSTask && createVSTask).then([this]() {
+			InitializeTriangleVertices();
+			InitializeChunks();
+		});
 
-			// Create an index buffer for the box (line strip)
-			uint32_t indices[] =
-			{
-				0, 1, 2, 3, 0
-			};
-
-			mIndexCount = ARRAYSIZE(indices);
-
-			D3D11_BUFFER_DESC indexBufferDesc = { 0 };
-			indexBufferDesc.ByteWidth = sizeof(uint32_t) * mIndexCount;
-			indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-			indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-			D3D11_SUBRESOURCE_DATA indexSubResourceData = { 0 };
-			indexSubResourceData.pSysMem = indices;
-			ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexSubResourceData, mIndexBuffer.ReleaseAndGetAddressOf()));
+		// Once the cube is loaded, the object is ready to be rendered.
+		createVerticesAndBallsTask.then([this]() {
 			mLoadingComplete = true;
 		});
 	}
@@ -133,16 +102,18 @@ namespace DirectXGame
 		mVertexShader.Reset();
 		mPixelShader.Reset();
 		mInputLayout.Reset();
-		mVertexBuffer.Reset();
-		mVertexBuffer.Reset();
+		mTriangleVertexBuffer.Reset();
 		mVSCBufferPerObject.Reset();
 		mPSCBufferPerObject.Reset();
 	}
 
-	//void ChunkManager::Update(const DX::StepTimer& timer)
-	//{
-	//	mBar->Update(timer);
-	//}
+	void ChunkManager::Update(const StepTimer& timer)
+	{
+		for (const auto& chunk : mChunks)
+		{
+			chunk->Update(timer);
+		}
+	}
 
 	void ChunkManager::Render(const StepTimer & timer)
 	{
@@ -155,54 +126,141 @@ namespace DirectXGame
 		}
 
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 		direct3DDeviceContext->IASetInputLayout(mInputLayout.Get());
-
-		static const UINT stride = sizeof(VertexPosition);
-		static const UINT offset = 0;
-		direct3DDeviceContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
-		direct3DDeviceContext->IASetIndexBuffer(mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 		direct3DDeviceContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
 		direct3DDeviceContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 
-		const XMMATRIX wvp = XMMatrixTranspose(mCamera->ViewProjectionMatrix());
-		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
 		direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
 		direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
 
-		DrawChunk(*mChunk);
+		for (const auto& chunk : mChunks)
+		{
+			DrawChunk(*chunk);
+		}
 	}
 
-	void ChunkManager::DrawChunk(const Chunk& chunk)
+	void ChunkManager::DrawChunk(const Chunk & chunk)
 	{
-		const XMFLOAT2& position = chunk.Position();
-		const XMFLOAT2& size = chunk.Size();
-		const XMFLOAT2 halfSize(size.x / 2.0f, size.y / 2.0f);
-
-		VertexPosition vertices[] =
-		{
-			// Upper-Left
-			VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y - (halfSize.y / 2), 0.0f, 1.0f)),
-
-			// Upper-Right
-			VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y - (halfSize.y / 2), 0.0f, 1.0f)),
-
-			// Lower-Right
-			VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
-
-			// Lower-Left
-			VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
-		};
-
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		uint32_t vertexCount = ARRAYSIZE(vertices);
-		D3D11_MAPPED_SUBRESOURCE mappedSubResource;
-		direct3DDeviceContext->Map(mVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &mappedSubResource);
-		memcpy(mappedSubResource.pData, vertices, sizeof(VertexPosition) * vertexCount);
-		direct3DDeviceContext->Unmap(mVertexBuffer.Get(), 0);
+		direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+		static const UINT stride = sizeof(VertexPosition);
+		static const UINT offset = 0;
+		direct3DDeviceContext->IASetVertexBuffers(0, 1, mTriangleVertexBuffer.GetAddressOf(), &stride, &offset);
+
+		const XMMATRIX wvp = XMMatrixTranspose(XMMatrixScaling(chunk.Radius(), chunk.Radius(), chunk.Radius()) * chunk.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
+		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
+
 		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &chunk.Color(), 0, 0);
 
-		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
+		direct3DDeviceContext->Draw(SolidCircleVertexCount, 0);
+	}
+
+	float ChunkManager::HandleBallCollision(const XMFLOAT2& ballPosition, const float& ballRadius)
+	{
+		//checking to see if this position collides w/a chunk position
+			//aka >= chunk bottom (chunk position.y - chunk height)
+		float hitPosition = 0.0f;
+
+		for (auto it = mChunks.begin(); it != mChunks.end(); ++it)
+		{
+			//if ((ballPosition.y + ballRadius) >= ((*it)->Position().y - mChunkHeight))
+			if ((ballPosition.y + ballRadius + 57) >= ((*it)->Position().y - mChunkHeight))
+			{
+				//if (((*it)->Position().x) <= (ballPosition.x - ballRadius) && (ballPosition.x + ballRadius) <= ((*it)->Position().x + mChunkWidth))
+				if (((*it)->Position().x) <= ballPosition.x && ballPosition.x <= ((*it)->Position().x + mChunkWidth))
+				{
+					hitPosition = ((*it)->Position().y - mChunkHeight) - 58;
+					mChunks.erase(it);
+					break;
+				}
+			}
+		}
+
+		return hitPosition;
+	}
+
+	void ChunkManager::InitializeTriangleVertices()
+	{
+		vector<VertexPosition> vertices;
+		vertices.reserve(4);
+
+		//top left vertex
+		VertexPosition topLeft;
+		topLeft.Position.x = 0;
+		topLeft.Position.y = -38;
+		topLeft.Position.z = 0.0f;
+		topLeft.Position.w = 1.0f;
+
+		//top right vertex
+		VertexPosition topRight;
+		topRight.Position.x = 6;
+		topRight.Position.y = -38;
+		topRight.Position.z = 0.0f;
+		topRight.Position.w = 1.0f;
+
+		//bottom right vertex
+		VertexPosition bottomLeft;
+		bottomLeft.Position.x = 6;
+		bottomLeft.Position.y = -40;
+		bottomLeft.Position.z = 0.0f;
+		bottomLeft.Position.w = 1.0f;
+
+		//bottom left vertex
+		VertexPosition bottomRight;
+		bottomRight.Position.x = 0;
+		bottomRight.Position.y = -40;
+		bottomRight.Position.z = 0.0f;
+		bottomRight.Position.w = 1.0f;
+
+		vertices.push_back(topLeft);
+		vertices.push_back(topRight);
+		vertices.push_back(bottomRight);
+		vertices.push_back(bottomLeft);
+
+		assert(vertices.size() == 4);
+
+		D3D11_BUFFER_DESC vertexBufferDesc = { 0 };
+		vertexBufferDesc.ByteWidth = sizeof(VertexPosition) * static_cast<uint32_t>(vertices.size());
+		vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA vertexSubResourceData = { 0 };
+		vertexSubResourceData.pSysMem = &vertices[0];
+		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexSubResourceData, mTriangleVertexBuffer.ReleaseAndGetAddressOf()));
+	}
+
+	void ChunkManager::InitializeChunks()
+	{
+		const float rotation = 0.0f;
+		const float radius = 1.5f;
+		const XMFLOAT2 velocity(0, 0);
+		float originalX = -45.0f;
+		XMFLOAT2 position(originalX, 97);
+		int colorIndex = 0;
+
+		if (mChunks.size() < mNumChunks)
+		{
+			for (uint32_t i = 1; i <= mNumChunks; ++i)
+			{
+				//mChunks.emplace_back(make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
+				mChunks.emplace(mChunks.begin(), make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
+
+
+				//if (i % 15 == 0)
+				if (i % 10 == 0)
+				{
+					colorIndex += 1;
+
+					//moving downwards to the next row
+					//position = XMFLOAT2(originalX - 6, (position.y - 3));
+					position = XMFLOAT2(originalX - mChunkWidth, (position.y - mChunkHeight));
+				}
+
+				//moving to the right to the next column
+				position = XMFLOAT2((position.x + mChunkWidth), position.y);
+			}
+		}
 	}
 }

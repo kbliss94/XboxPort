@@ -12,9 +12,9 @@ namespace DirectXGame
 	const uint32_t BallManager::LineCircleVertexCount = BallManager::CircleResolution + 2;
 	const uint32_t BallManager::SolidCircleVertexCount = (BallManager::CircleResolution + 1) * 2;
 
-	BallManager::BallManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera) :
+	BallManager::BallManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, ChunkManager& chunkManager, BarManager& barManager) :
 		DrawableGameComponent(deviceResources, camera),
-		mLoadingComplete(false)
+		mLoadingComplete(false), mChunkManager(chunkManager), mBarManager(barManager)
 	{
 		CreateDeviceDependentResources();
 	}
@@ -232,12 +232,12 @@ namespace DirectXGame
 			vertex.Position.z = 0.0f;
 			vertex.Position.w = 1.0f;
 
-			vertices.push_back(vertex);			
+			vertices.push_back(vertex);
 			vertices.push_back(center);
 		}
 
 		assert(vertices.size() == SolidCircleVertexCount);
-				
+
 		D3D11_BUFFER_DESC vertexBufferDesc = { 0 };
 		vertexBufferDesc.ByteWidth = sizeof(VertexPosition) * static_cast<uint32_t>(vertices.size());
 		vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -250,38 +250,15 @@ namespace DirectXGame
 
 	void BallManager::InitializeBalls()
 	{
-		random_device device;
-		default_random_engine generator(device());
-
-		const float minVelocity = -30.0f;
-		const float maxVelocity = 30.0f;
-		uniform_real_distribution<float> velocityDistribution(minVelocity, maxVelocity);
-		uniform_int_distribution<uint32_t> isSolidDistribution(0, 1);
-		
-		uniform_real_distribution<float> rotationDistribution(0, XM_2PI);
-
-		//const float minRadius = 4.0f;
-		//const float maxRadius = 5.0f;
-		//uniform_real_distribution<float> radiusDistribution(minRadius, maxRadius);
-
-		//since there's only one ball:
-		const float rotation = rotationDistribution(generator);
+		const float rotation = .5;
 		const float radius = 1.5f;
-		const XMFLOAT4 color = ColorHelper::RandomColor();
-		const XMFLOAT2 velocity(velocityDistribution(generator), velocityDistribution(generator));
+		const XMFLOAT4 color(&Colors::CornflowerBlue[0]);
+		const XMFLOAT2 velocity(15, 15);
 		const bool isSolid = true;
-		mBalls.emplace_back(make_shared<Ball>(*this, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
 
-
-		//const uint32_t ballCount = 1;
-		//for (uint32_t i = 0; i < ballCount; ++i)
-		//{			
-		//	const float rotation = rotationDistribution(generator);
-		//	const float radius = radiusDistribution(generator);
-		//	const XMFLOAT4 color = ColorHelper::RandomColor();
-		//	const XMFLOAT2 velocity(velocityDistribution(generator), velocityDistribution(generator));
-		//	const bool isSolid = isSolidDistribution(generator) < 1;
-		//	mBalls.emplace_back(make_shared<Ball>(*this, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
-		//}
+		if (mBalls.size() != 1)
+		{
+			mBalls.emplace_back(make_shared<Ball>(*this, mChunkManager, mBarManager, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
+		}
 	}
 }

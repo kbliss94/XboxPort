@@ -13,11 +13,15 @@ namespace DX
 namespace DirectXGame
 {
 	class BallManager;
+	class ChunkManager;
+	class BarManager;
 
-	class Ball final
+	class Ball
 	{
 	public:
-		Ball(BallManager& ballManager, const DX::Transform2D& transform, float radius, const DirectX::XMFLOAT4& color = DirectX::XMFLOAT4(&DirectX::Colors::White[0]), const DirectX::XMFLOAT2& velocity = DX::Vector2Helper::Zero, bool isSolid = false);
+		Ball(BallManager& ballManager, ChunkManager& chunkManager, BarManager& barManager, const DX::Transform2D& transform, float radius,
+			const DirectX::XMFLOAT4& color = DirectX::XMFLOAT4(&DirectX::Colors::White[0]), 
+			const DirectX::XMFLOAT2& velocity = DX::Vector2Helper::Zero, bool isSolid = false);
 		Ball(const Ball&) = default;
 		Ball& operator=(const Ball&) = delete;
 		Ball(Ball&&) = default;
@@ -50,5 +54,9 @@ namespace DirectXGame
 		DirectX::XMFLOAT4 mColor;
 		DirectX::XMFLOAT2 mVelocity;
 		bool mIsSolid;
+
+
+		ChunkManager& mChunkManager;
+		BarManager& mBarManager;
 	};
 }

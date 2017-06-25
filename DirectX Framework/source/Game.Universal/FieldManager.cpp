@@ -30,7 +30,7 @@ namespace DirectXGame
 	{
 		// Create a field
 		const XMFLOAT2 position = Vector2Helper::Zero;
-		const XMFLOAT2 size(95, 80);
+		const XMFLOAT2 size(90, 80);
 		const XMFLOAT4 color(&Colors::AntiqueWhite[0]);
 		mActiveField = make_shared<Field>(position, size, color);		
 
@@ -136,30 +136,30 @@ namespace DirectXGame
 	{
 		UNREFERENCED_PARAMETER(timer);
 
-		// Loading is asynchronous. Only draw geometry after it's loaded.
-		if (!mLoadingComplete)
-		{
-			return;
-		}
+		//// Loading is asynchronous. Only draw geometry after it's loaded.
+		//if (!mLoadingComplete)
+		//{
+		//	return;
+		//}
 
-		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		direct3DDeviceContext->IASetInputLayout(mInputLayout.Get());
+		//ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
+		//direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+		//direct3DDeviceContext->IASetInputLayout(mInputLayout.Get());
 
-		static const UINT stride = sizeof(VertexPosition);
-		static const UINT offset = 0;
-		direct3DDeviceContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
-		direct3DDeviceContext->IASetIndexBuffer(mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+		//static const UINT stride = sizeof(VertexPosition);
+		//static const UINT offset = 0;
+		//direct3DDeviceContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
+		//direct3DDeviceContext->IASetIndexBuffer(mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-		direct3DDeviceContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
-		direct3DDeviceContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
+		//direct3DDeviceContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
+		//direct3DDeviceContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 
-		const XMMATRIX wvp = XMMatrixTranspose(mCamera->ViewProjectionMatrix());
-		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
-		direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
-		direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
+		//const XMMATRIX wvp = XMMatrixTranspose(mCamera->ViewProjectionMatrix());
+		//direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
+		//direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
+		//direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
 
-		DrawField(*mActiveField);
+		//DrawField(*mActiveField);
 	}
 
 	void FieldManager::DrawField(const Field& field)

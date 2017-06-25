@@ -6,9 +6,9 @@ using namespace DX;
 
 namespace DirectXGame
 {
-	Ball::Ball(BallManager& ballManager, const Transform2D& transform, float radius, const XMFLOAT4& color, const XMFLOAT2& velocity, bool isSolid) :
-		mBallManager(ballManager), mTransform(transform), mRadius(radius),
-		mColor(color), mVelocity(velocity), mIsSolid(isSolid)
+	Ball::Ball(BallManager& ballManager, ChunkManager& chunkManager, BarManager& barManager, const Transform2D& transform, float radius, const XMFLOAT4& color, const XMFLOAT2& velocity, bool isSolid) :
+		mBallManager(ballManager), mChunkManager(chunkManager), mTransform(transform), mRadius(radius),
+		mColor(color), mVelocity(velocity), mIsSolid(isSolid), mBarManager(barManager)
 	{
 	}
 
@@ -96,29 +96,37 @@ namespace DirectXGame
 			updatedPosition.x = leftSide + mRadius;
 			hasCollidedWithField = true;
 		}
-		if (position.x + mRadius >= rightSide)
+		else if (position.x + mRadius >= rightSide)
 		{
 			mVelocity.x *= -1;
 			updatedPosition.x = rightSide - mRadius;
 			hasCollidedWithField = true;
 		}
-		if (position.y - mRadius <= bottomSide)
+		//checking to see if the ball has collided with the bar -30
+
+		//else if (position.y - mRadius <= bottomSide)
+		//{
+		//	mVelocity.y *= -1;
+		//	updatedPosition.y = bottomSide + mRadius;
+		//	hasCollidedWithField = true;
+		//}
+		//checking to see if the ball has collided with a chunk
+		else if (position.y + mRadius >= 22)
 		{
-			mVelocity.y *= -1;
-			updatedPosition.y = bottomSide + mRadius;
-			hasCollidedWithField = true;
+			float chunkCollision = mChunkManager.HandleBallCollision(position, mRadius);
+
+			if (chunkCollision != 0.0f)
+			{
+				mVelocity.y *= -1;
+				updatedPosition.y = chunkCollision;
+				hasCollidedWithField = true;
+			}
 		}
-		if (position.y + mRadius >= topSide)
-		{
-			mVelocity.y *= -1;
-			updatedPosition.y = topSide - mRadius;
-			hasCollidedWithField = true;
-		}
+
 
 		if (hasCollidedWithField)
 		{
 			mTransform.SetPosition(updatedPosition);
-			mColor = ColorHelper::RandomColor();
 		}
 	}
 }

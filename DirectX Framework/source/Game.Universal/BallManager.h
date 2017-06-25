@@ -8,11 +8,13 @@ namespace DirectXGame
 {
 	class Ball;
 	class Field;
+	class ChunkManager;
+	class BarManager;
 
 	class BallManager final : public DX::DrawableGameComponent
 	{
 	public:
-		BallManager(const std::shared_ptr<DX::DeviceResources>& deviceResources, const std::shared_ptr<DX::Camera>& camera);
+		BallManager(const std::shared_ptr<DX::DeviceResources>& deviceResources, const std::shared_ptr<DX::Camera>& camera, ChunkManager& chunkManager, BarManager& barManager);
 
 		std::shared_ptr<Field> ActiveField() const;
 		void SetActiveField(const std::shared_ptr<Field>& field);
@@ -43,6 +45,9 @@ namespace DirectXGame
 		bool mLoadingComplete;
 		std::vector<std::shared_ptr<Ball>> mBalls;
 		std::shared_ptr<Field> mActiveField;
+
+		ChunkManager& mChunkManager;
+		BarManager& mBarManager;
 	};
 }
 
