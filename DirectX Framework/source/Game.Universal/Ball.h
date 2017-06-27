@@ -16,12 +16,11 @@ namespace DirectXGame
 	class ChunkManager;
 	class BarManager;
 
-	class Ball
+	class Ball final
 	{
 	public:
 		Ball(BallManager& ballManager, ChunkManager& chunkManager, BarManager& barManager, const DX::Transform2D& transform, float radius,
-			const DirectX::XMFLOAT4& color = DirectX::XMFLOAT4(&DirectX::Colors::White[0]), 
-			const DirectX::XMFLOAT2& velocity = DX::Vector2Helper::Zero, bool isSolid = false);
+			const DirectX::XMFLOAT4& color = DirectX::XMFLOAT4(&DirectX::Colors::White[0]), const DirectX::XMFLOAT2& velocity = DX::Vector2Helper::Zero);
 		Ball(const Ball&) = default;
 		Ball& operator=(const Ball&) = delete;
 		Ball(Ball&&) = default;
@@ -32,16 +31,12 @@ namespace DirectXGame
 		void SetTransform(const DX::Transform2D& transform);
 
 		float Radius() const;
-		//void SetRadius(const float radius);
 
 		const DirectX::XMFLOAT4& Color() const;
 		void SetColor(const DirectX::XMFLOAT4& color);
 
 		const DirectX::XMFLOAT2& Velocity() const;
 		void SetVelocity(const DirectX::XMFLOAT2& velocity);
-
-		bool IsSolid() const;
-		void SetIsSolid(const bool isSolid);
 
 		void Update(const DX::StepTimer& timer);
 
@@ -53,8 +48,6 @@ namespace DirectXGame
 		float mRadius;
 		DirectX::XMFLOAT4 mColor;
 		DirectX::XMFLOAT2 mVelocity;
-		bool mIsSolid;
-
 
 		ChunkManager& mChunkManager;
 		BarManager& mBarManager;

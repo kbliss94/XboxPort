@@ -27,11 +27,14 @@ namespace DirectXGame
 		void IncreaseBallVelocity();
 		void DecreaseBallVelocity();
 
+		const bool LaunchedBall() const;
+		void LaunchBall();
+		void BallOffscreen();
+
 	private:
 		void InitializeLineVertices();
 		void InitializeTriangleVertices();
-		void InitializeBalls();
-		void DrawBall(const Ball& ball);
+		void InitializeBall();
 		void DrawSolidBall(const Ball& ball);
 
 		static const std::uint32_t CircleResolution;
@@ -45,12 +48,15 @@ namespace DirectXGame
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mTriangleVertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mVSCBufferPerObject;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mPSCBufferPerObject;
-		bool mLoadingComplete;
-		std::vector<std::shared_ptr<Ball>> mBalls;
-		std::shared_ptr<Field> mActiveField;
 
+		bool mLoadingComplete;
+		bool mBallLaunched;
+		std::shared_ptr<Ball> mBall;
+		std::shared_ptr<Field> mActiveField;
 		ChunkManager& mChunkManager;
 		BarManager& mBarManager;
+
+		const DirectX::XMFLOAT2 mInitialVelocity = DirectX::XMFLOAT2(17.0f, 17.0f);
 	};
 }
 

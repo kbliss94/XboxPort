@@ -14,7 +14,7 @@ namespace DirectXGame
 
 	BallManager::BallManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, ChunkManager& chunkManager, BarManager& barManager) :
 		DrawableGameComponent(deviceResources, camera),
-		mLoadingComplete(false), mChunkManager(chunkManager), mBarManager(barManager)
+		mLoadingComplete(false), mChunkManager(chunkManager), mBarManager(barManager), mBallLaunched(false)
 	{
 		CreateDeviceDependentResources();
 	}
@@ -90,7 +90,7 @@ namespace DirectXGame
 		auto createVerticesAndBallsTask = (createPSTask && createVSTask).then([this]() {
 			InitializeLineVertices();
 			InitializeTriangleVertices();
-			InitializeBalls();
+			InitializeBall();
 		});
 
 		// Once the cube is loaded, the object is ready to be rendered.
@@ -113,10 +113,7 @@ namespace DirectXGame
 
 	void BallManager::Update(const StepTimer& timer)
 	{
-		for (const auto& ball : mBalls)
-		{
-			ball->Update(timer);
-		}
+		mBall->Update(timer);
 	}
 
 	void BallManager::Render(const StepTimer & timer)
@@ -138,94 +135,57 @@ namespace DirectXGame
 		direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
 		direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
 
-		for (const auto& ball : mBalls)
-		{
-			if (ball->IsSolid())
-			{
-				DrawSolidBall(*ball);
-			}
-			else
-			{
-				DrawBall(*ball);
-			}
-		}
+		DrawSolidBall(*mBall);
 	}
 
 	void BallManager::IncreaseBallVelocity()
 	{
-		shared_ptr<Ball> ball = mBalls[0];
-		XMFLOAT2 newVelocity = ball->Velocity();
+		XMFLOAT2 newVelocity = mBall->Velocity();
 
-		if (ball->Velocity().x < 0)
+		if (mBall->Velocity().x < 0)
 		{
 			newVelocity.x -= 5;
-			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x - 1), ball->Velocity().y));
 		}
-		else if (ball->Velocity().x > 0)
+		else if (mBall->Velocity().x > 0)
 		{
 			newVelocity.x += 5;
-			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x + 1), ball->Velocity().y));
 		}
 
-		if (ball->Velocity().y < 0)
+		if (mBall->Velocity().y < 0)
 		{
 			newVelocity.y -= 5;
-			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y - 1)));
 		}
-		else if (ball->Velocity().y > 0)
+		else if (mBall->Velocity().y > 0)
 		{
 			newVelocity.y += 5;
-			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y + 1)));
 		}
 
-		ball->SetVelocity(newVelocity);
+		mBall->SetVelocity(newVelocity);
 	}
 
 	void BallManager::DecreaseBallVelocity()
 	{
-		shared_ptr<Ball> ball = mBalls[0];
-		XMFLOAT2 newVelocity = ball->Velocity();
+		XMFLOAT2 newVelocity = mBall->Velocity();
 
-		if (ball->Velocity().x < 0)
+		if (mBall->Velocity().x < 0)
 		{
 			newVelocity.x += 5;
-			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x - 1), ball->Velocity().y));
 		}
-		else if (ball->Velocity().x > 0)
+		else if (mBall->Velocity().x > 0)
 		{
 			newVelocity.x -= 5;
-			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x + 1), ball->Velocity().y));
 		}
 
-		if (ball->Velocity().y < 0)
+		if (mBall->Velocity().y < 0)
 		{
 			newVelocity.y += 5;
-			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y - 1)));
 		}
-		else if (ball->Velocity().y > 0)
+		else if (mBall->Velocity().y > 0)
 		{
 			newVelocity.y -= 5;
-			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y + 1)));
 		}
 
-		ball->SetVelocity(newVelocity);
-	}
-
-	void BallManager::DrawBall(const Ball& ball)
-	{
-		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-		static const UINT stride = sizeof(VertexPosition);
-		static const UINT offset = 0;
-		direct3DDeviceContext->IASetVertexBuffers(0, 1, mLineVertexBuffer.GetAddressOf(), &stride, &offset);
-
-		const XMMATRIX wvp = XMMatrixTranspose(XMMatrixScaling(ball.Radius(), ball.Radius(), ball.Radius()) * ball.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
-		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
-
-		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &ball.Color(), 0, 0);
-
-		direct3DDeviceContext->Draw(LineCircleVertexCount, 0);
+		mBall->SetVelocity(newVelocity);
 	}
 
 	void BallManager::DrawSolidBall(const Ball & ball)
@@ -243,6 +203,22 @@ namespace DirectXGame
 		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &ball.Color(), 0, 0);
 
 		direct3DDeviceContext->Draw(SolidCircleVertexCount, 0);
+	}
+
+	const bool BallManager::LaunchedBall() const
+	{
+		return mBallLaunched;
+	}
+
+	void BallManager::LaunchBall()
+	{
+		mBall->SetVelocity(mInitialVelocity);
+		mBallLaunched = true;
+	}
+
+	void BallManager::BallOffscreen()
+	{
+		mChunkManager.GameOver();
 	}
 
 	void BallManager::InitializeLineVertices()
@@ -308,17 +284,14 @@ namespace DirectXGame
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexSubResourceData, mTriangleVertexBuffer.ReleaseAndGetAddressOf()));
 	}
 
-	void BallManager::InitializeBalls()
+	void BallManager::InitializeBall()
 	{
 		const float rotation = 0.5f;
 		const float radius = 1.5f;
-		const XMFLOAT4 color(&Colors::CornflowerBlue[0]);
-		const XMFLOAT2 velocity(15, 15);
-		const bool isSolid = true;
+		const XMFLOAT4 color(&Colors::PeachPuff[0]);
+		const XMFLOAT2 velocity(0, 0);
 
-		if (mBalls.size() != 1)
-		{
-			mBalls.emplace_back(make_shared<Ball>(*this, mChunkManager, mBarManager, Transform2D(Vector2Helper::Zero, rotation), radius, color, velocity, isSolid));
-		}
+		mBall = make_shared<Ball>(*this, mChunkManager, mBarManager, Transform2D(XMFLOAT2(0, (-3*(float)(mBarManager.BarUpperY()) - (radius*5))), rotation), radius,
+			color, velocity);
 	}
 }

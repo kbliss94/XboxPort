@@ -6,7 +6,7 @@
 
 namespace DirectXGame
 {
-	// Renders the current FPS value in the bottom right corner of the screen using Direct2D and DirectWrite.
+	// Renders the score in the top center of the screen using Direct2D and DirectWrite.
 	class ScoreManager final : public DX::DrawableGameComponent
 	{
 	public:
@@ -18,6 +18,9 @@ namespace DirectXGame
 		virtual void Render(const DX::StepTimer& timer) override;
 
 		void IncrementScore();
+		void SetGameOver();
+		const bool IsGameOver();
+		void SetBallLaunched();
 
 	private:
 		std::wstring                                    m_text;
@@ -28,5 +31,7 @@ namespace DirectXGame
 		Microsoft::WRL::ComPtr<IDWriteTextFormat2>      m_textFormat;
 
 		std::int32_t mScore;
+		bool mGameOver;
+		bool mBallLaunched;
 	};
 }

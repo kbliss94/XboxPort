@@ -135,31 +135,6 @@ namespace DirectXGame
 	void FieldManager::Render(const StepTimer & timer)
 	{
 		UNREFERENCED_PARAMETER(timer);
-
-		//// Loading is asynchronous. Only draw geometry after it's loaded.
-		//if (!mLoadingComplete)
-		//{
-		//	return;
-		//}
-
-		//ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		//direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		//direct3DDeviceContext->IASetInputLayout(mInputLayout.Get());
-
-		//static const UINT stride = sizeof(VertexPosition);
-		//static const UINT offset = 0;
-		//direct3DDeviceContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
-		//direct3DDeviceContext->IASetIndexBuffer(mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-		//direct3DDeviceContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
-		//direct3DDeviceContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
-
-		//const XMMATRIX wvp = XMMatrixTranspose(mCamera->ViewProjectionMatrix());
-		//direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
-		//direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
-		//direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
-
-		//DrawField(*mActiveField);
 	}
 
 	void FieldManager::DrawField(const Field& field)
@@ -181,12 +156,6 @@ namespace DirectXGame
 
 			// Lower-Left
 			VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y + (halfSize.y / 2), 0.0f, 1.0f)),
-
-			//// Lower-Right
-			//VertexPosition(XMFLOAT4(position.x + halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
-
-			//// Lower-Left
-			//VertexPosition(XMFLOAT4(position.x - halfSize.x, position.y - halfSize.y, 0.0f, 1.0f)),
 		};
 
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();

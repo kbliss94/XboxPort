@@ -89,7 +89,6 @@ namespace DirectXGame
 
 		auto createVerticesAndBallsTask = (createPSTask && createVSTask).then([this]() {
 			InitializeTriangleVertices();
-			//InitializePowerup();
 		});
 
 		// Once the cube is loaded, the object is ready to be rendered.
@@ -118,7 +117,7 @@ namespace DirectXGame
 
 		for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
 		{
-			//if (powerup y + powerup height) is within bar y, check for collision
+			//If the powerup is within the range of the bar, check for collision
 			if (((*it)->Position().y + mPowerupHeight) <= mBarManager.BarUpperY())
 			{
 				if (mBarManager.HandlePowerupCollision((*it)->Position(), mPowerupWidth))
@@ -127,7 +126,7 @@ namespace DirectXGame
 					{
 						(*it)->ActivatePowerup();
 
-						//trigger the appropriate powerup effect
+						//Trigger the appropriate powerup effect
 						if ((*it)->Type() == Powerup::FasterBar)
 						{
 							mBarManager.IncreaseBarVelocity();
@@ -145,37 +144,17 @@ namespace DirectXGame
 							mBallManager->DecreaseBallVelocity();
 						}
 					}
-
-					//trigger the appropriate powerup effect
-					//if (mPowerups.size() != 1)
-					//{
-					//	mPowerups.erase(it);
-					//}
 				}
 			}
 		}
 
 		for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
 		{
-			//if powerup y is within bottom of screen(/bar), delete the chunk 
-			//if ((*it)->Position().y <= (mBarManager.BarLowerY()))
 			if ((*it)->Position().y <= 0)
 			{
 				(*it)->ActivatePowerup();
-				//if (mPowerups.size() != 1)
-				//{
-				//	mPowerups.erase(it);
-				//}
 			}
 		}
-
-		//for (const auto& powerup : mPowerups)
-		//{
-		//	if (!(powerup->Activated()))
-		//	{
-		//		powerup->Update(timer);
-		//	}
-		//}
 	}
 
 	void PowerupManager::Render(const StepTimer & timer)
@@ -220,32 +199,6 @@ namespace DirectXGame
 		direct3DDeviceContext->Draw(SolidCircleVertexCount, 0);
 	}
 
-	//float PowerupManager::HandleBarCollision(const XMFLOAT2& ballPosition, const float& ballRadius)
-	//{
-	//	UNREFERENCED_PARAMETER(ballPosition);
-	//	UNREFERENCED_PARAMETER(ballRadius);
-
-	//	//should prob have a public enum in Powerup so you can check which powerup was caught
-
-	//	return 0.0f;
-	//	//float hitPosition = 0.0f;
-
-	//	//for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
-	//	//{
-	//	//	if ((ballPosition.y + ballRadius + 57) >= ((*it)->Position().y - mChunkHeight))
-	//	//	{
-	//	//		if (((*it)->Position().x) <= ballPosition.x && ballPosition.x <= ((*it)->Position().x + mChunkWidth))
-	//	//		{
-	//	//			hitPosition = ((*it)->Position().y - mChunkHeight) - 58;
-	//	//			mPowerups.erase(it);
-	//	//			break;
-	//	//		}
-	//	//	}
-	//	//}
-
-	//	//return hitPosition;
-	//}
-
 	void PowerupManager::SetBallManager(std::shared_ptr<BallManager> ballManager)
 	{
 		mBallManager = ballManager;
@@ -253,28 +206,24 @@ namespace DirectXGame
 
 	void PowerupManager::PowerupSpawnCheck(const XMFLOAT2& chunkPosition)
 	{
-		//probability check to see if a powerup should be spawned (.25 chance)
-		//random_device device;
-		//default_random_engine generator(device());
-		//uniform_int_distribution<uint32_t> spawnDistribution(0, 3);
+		//Probability check to see if a powerup should be spawned (.25 chance)
+		random_device device;
+		default_random_engine generator(device());
+		uniform_int_distribution<uint32_t> spawnDistribution(0, 3);
 
-		//if (spawnDistribution(generator) == 0)
-		//{
-		//	SpawnPowerup(chunkPosition);
-		//}
-
-		SpawnPowerup(chunkPosition);
+		if (spawnDistribution(generator) == 0)
+		{
+			SpawnPowerup(chunkPosition);
+		}
 	}
 
 	void PowerupManager::SpawnPowerup(const XMFLOAT2& chunkPosition)
 	{
-		//randomly selecting powerup effect (& associated color) here
+		//Randomly selecting powerup effect (& associated color)
 		random_device device;
 		default_random_engine generator(device());
 		uniform_int_distribution<uint32_t> powerupDistribution(0, 3);
-
-		//uint32_t powerupSelection = powerupDistribution(generator);
-		uint32_t powerupSelection = 0;
+		uint32_t powerupSelection = powerupDistribution(generator);
 
 		InitializePowerup(chunkPosition, mPossiblePowerups[powerupSelection].Type, mPossiblePowerups[powerupSelection].Color);
 	}
@@ -284,28 +233,28 @@ namespace DirectXGame
 		vector<VertexPosition> vertices;
 		vertices.reserve(4);
 
-		//top left vertex
+		//Top left vertex
 		VertexPosition topLeft;
 		topLeft.Position.x = 0;
 		topLeft.Position.y = -38;
 		topLeft.Position.z = 0.0f;
 		topLeft.Position.w = 1.0f;
 
-		//top right vertex
+		//Top right vertex
 		VertexPosition topRight;
 		topRight.Position.x = 3;
 		topRight.Position.y = -38;
 		topRight.Position.z = 0.0f;
 		topRight.Position.w = 1.0f;
 
-		//bottom right vertex
+		//Bottom right vertex
 		VertexPosition bottomLeft;
 		bottomLeft.Position.x = 3;
 		bottomLeft.Position.y = -40;
 		bottomLeft.Position.z = 0.0f;
 		bottomLeft.Position.w = 1.0f;
 
-		//bottom left vertex
+		//Bottom left vertex
 		VertexPosition bottomRight;
 		bottomRight.Position.x = 0;
 		bottomRight.Position.y = -40;
@@ -334,9 +283,7 @@ namespace DirectXGame
 		const float rotation = 0.0f;
 		const float radius = 1.5f;
 		const XMFLOAT2 velocity(0, -10);
-		//int colorIndex = 0;
-		
-		//mPowerups.emplace_back(make_shared<Powerup>(*this, position, radius, mChunkColors[colorIndex], velocity));
+
 		mPowerups.emplace_back(make_shared<Powerup>(*this, position, radius, color, velocity, type));
 	}
 }

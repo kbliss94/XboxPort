@@ -39,5 +39,7 @@ namespace DirectXGame
 		std::shared_ptr<DX::GamePadComponent> mGamePad;
 
 		std::shared_ptr<BarManager> mBarManager;
+		std::shared_ptr<BallManager> mBallManager;
+		std::shared_ptr<ScoreManager> mScoreManager;
 	};
 }

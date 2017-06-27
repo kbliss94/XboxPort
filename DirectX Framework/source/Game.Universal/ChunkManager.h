@@ -26,8 +26,8 @@ namespace DirectXGame
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
-		//returns the y position at which a chunk was hit & deleted (returns 0 if no chunk was hit)
 		float HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius);
+		void GameOver();
 
 	private:
 		void InitializeTriangleVertices();
@@ -47,6 +47,8 @@ namespace DirectXGame
 		bool mLoadingComplete;
 		std::vector<std::shared_ptr<Chunk>> mChunks;
 		std::shared_ptr<Field> mActiveField;
+		ScoreManager& mScoreManager;
+		PowerupManager& mPowerupManager;
 
 		const uint32_t mNumChunks = 60;
 		const int32_t mChunkHeight = 3;
@@ -61,8 +63,5 @@ namespace DirectXGame
 			(DirectX::XMFLOAT4)DirectX::Colors::LawnGreen,
 			(DirectX::XMFLOAT4)DirectX::Colors::LightSkyBlue
 		};
-
-		ScoreManager& mScoreManager;
-		PowerupManager& mPowerupManager;
 	};
 }

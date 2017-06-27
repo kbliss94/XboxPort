@@ -67,7 +67,6 @@ namespace DirectXGame
 		position.y += mVelocity.y * static_cast<float>(elapsedTime);
 
 		mTransform.SetPosition(position);
-		CheckForFieldCollision();
 	}
 
 	void Powerup::ActivatePowerup()
@@ -78,33 +77,5 @@ namespace DirectXGame
 	const bool Powerup::Activated() const
 	{
 		return mActivated;
-	}
-
-	void Powerup::CheckForFieldCollision()
-	{
-		//bar is always at y=15, so once powerup goes past this,
-			//call HandlePowerupCollision in BarManager
-
-
-		//const auto& position = mTransform.Position();
-		//XMFLOAT2 updatedPosition = position;
-		//bool hasCollidedWithField = false;
-
-		//if (position.x - mWidth <= mFieldLeftSide)
-		//{
-		//	updatedPosition.x = mFieldLeftSide + mWidth;
-		//	hasCollidedWithField = true;
-		//}
-
-		//if (position.x + mWidth >= mFieldRightSide)
-		//{
-		//	updatedPosition.x = mFieldRightSide - mWidth;
-		//	hasCollidedWithField = true;
-		//}
-
-		//if (hasCollidedWithField)
-		//{
-		//	mTransform.SetPosition(updatedPosition);
-		//}
 	}
 }

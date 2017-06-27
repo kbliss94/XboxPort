@@ -14,10 +14,9 @@ namespace DirectXGame
 {
 	class PowerupManager;
 
-	class Powerup
+	class Powerup final
 	{
 	public:
-
 		enum PowerupType
 		{
 			FasterBall,
@@ -53,19 +52,16 @@ namespace DirectXGame
 		const bool Activated() const;
 
 	private:
-		void CheckForFieldCollision();
-
 		PowerupManager& mPowerupManager;
 		DX::Transform2D mTransform;
 		float mRadius;
 		DirectX::XMFLOAT4 mColor;
 		DirectX::XMFLOAT2 mVelocity;
+		PowerupType mType;
+		bool mActivated;
 
 		const float mWidth = 3.0f;
 		const float mFieldRightSide = 40.0f;
 		const float mFieldLeftSide = -52.0f;
-
-		PowerupType mType;
-		bool mActivated;
 	};
 }

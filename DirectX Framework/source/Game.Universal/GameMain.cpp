@@ -35,16 +35,11 @@ namespace DirectXGame
 		mGamePad = make_shared<GamePadComponent>(mDeviceResources);
 		mComponents.push_back(mGamePad);
 
-		auto fpsTextRenderer = make_shared<FpsTextRenderer>(mDeviceResources);
-		mComponents.push_back(fpsTextRenderer);
-
 		auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
 		mComponents.push_back(fieldManager);
 
-		auto scoreManager = make_shared<ScoreManager>(mDeviceResources);
-		mComponents.push_back(scoreManager);
+		mScoreManager = make_shared<ScoreManager>(mDeviceResources);
 
-		///////////
 		mBarManager = make_shared<BarManager>(mDeviceResources, camera);
 		mBarManager->SetActiveField(fieldManager->ActiveField());
 
@@ -52,17 +47,14 @@ namespace DirectXGame
 		powerupManager->SetActiveField(fieldManager->ActiveField());
 		mComponents.push_back(powerupManager);
 
-		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera, *scoreManager, *powerupManager);
+		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera, *mScoreManager, *powerupManager);
 		chunkManager->SetActiveField(fieldManager->ActiveField());
 		mComponents.push_back(chunkManager);
 
-		auto ballManager = make_shared<BallManager>(mDeviceResources, camera, *chunkManager, *mBarManager);
-		ballManager->SetActiveField(fieldManager->ActiveField());
-		mComponents.push_back(ballManager);
+		mBallManager = make_shared<BallManager>(mDeviceResources, camera, *chunkManager, *mBarManager);
+		mBallManager->SetActiveField(fieldManager->ActiveField());
 
-		powerupManager->SetBallManager(ballManager);
-
-		//////////
+		powerupManager->SetBallManager(mBallManager);
 
 		mTimer.SetFixedTimeStep(true);
 		mTimer.SetTargetElapsedSeconds(1.0 / 60);
@@ -103,16 +95,35 @@ namespace DirectXGame
 			}
 
 			//Bar movement
-			if (mKeyboard->IsKeyHeldDown(Keys::D))
+			if (mKeyboard->IsKeyHeldDown(Keys::D) || mGamePad->CurrentState().IsLeftThumbStickRight())
 			{
 				mBarManager->MoveRight();
 				mBarManager->Update(mTimer);
 			}
 
-			if (mKeyboard->IsKeyHeldDown(Keys::A))
+			if (mKeyboard->IsKeyHeldDown(Keys::A) || mGamePad->CurrentState().IsLeftThumbStickLeft())
 			{
 				mBarManager->MoveLeft();
 				mBarManager->Update(mTimer);
+			}
+
+			if (mKeyboard->WasKeyPressedThisFrame(Keys::Space) && !mBallManager->LaunchedBall())
+			{
+				mBallManager->LaunchBall();
+				mScoreManager->SetBallLaunched();
+			}
+
+			if (mGamePad->WasButtonPressedThisFrame(GamePadButtons::A) && !mBallManager->LaunchedBall())
+			{
+				mBallManager->LaunchBall();
+				mScoreManager->SetBallLaunched();
+			}
+
+			mScoreManager->Update(mTimer);
+
+			if (!mScoreManager->IsGameOver())
+			{
+				mBallManager->Update(mTimer);
 			}
 		});
 	}
@@ -151,6 +162,8 @@ namespace DirectXGame
 		}
 
 		mBarManager->Render(mTimer);
+		mBallManager->Render(mTimer);
+		mScoreManager->Render(mTimer);
 
 		return true;
 	}

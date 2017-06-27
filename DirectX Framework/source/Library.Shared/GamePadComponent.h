@@ -49,10 +49,12 @@ namespace DX
 		bool WasButtonReleasedThisFrame(GamePadButtons button) const;
 		bool IsButtonHeldDown(GamePadButtons button) const;
 
+		bool GetButtonState(const DirectX::GamePad::State& state, GamePadButtons button) const;
+
 	private:
 		static std::unique_ptr<DirectX::GamePad> sGamePad;
 
-		bool GetButtonState(const DirectX::GamePad::State& state, GamePadButtons button) const;
+
 
 		int mPlayer;
 		DirectX::GamePad::State mCurrentState;

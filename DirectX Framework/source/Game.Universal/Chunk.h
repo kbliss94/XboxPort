@@ -14,7 +14,7 @@ namespace DirectXGame
 {
 	class ChunkManager;
 
-	class Chunk
+	class Chunk final
 	{
 	public:
 		Chunk(ChunkManager& chunkManager, const DX::Transform2D& transform, float radius, const DirectX::XMFLOAT4& color, const DirectX::XMFLOAT2& velocity);
@@ -39,8 +39,6 @@ namespace DirectXGame
 		void Update(const DX::StepTimer& timer);
 
 	private:
-		void CheckForFieldCollision();
-
 		ChunkManager& mChunkManager;
 		DX::Transform2D mTransform;
 		float mRadius;

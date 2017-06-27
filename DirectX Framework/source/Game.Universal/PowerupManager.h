@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Powerup.h"
-
 #include "DrawableGameComponent.h"
 #include <DirectXMath.h>
 #include <vector>
@@ -9,7 +8,6 @@
 
 namespace DirectXGame
 {
-	//class Powerup;
 	class Field;
 	class BarManager;
 	class BallManager;
@@ -39,12 +37,7 @@ namespace DirectXGame
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
-		//returns the y position at which a chunk was hit & deleted (returns 0 if no chunk was hit)
-		//float HandleBarCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius);
-
-		//could pass in the hit chunk's position to see where to spawn the powerup
 		void PowerupSpawnCheck(const DirectX::XMFLOAT2& chunkPosition);
-
 		void SetBallManager(std::shared_ptr<BallManager> ballManager);
 
 	private:
@@ -67,6 +60,8 @@ namespace DirectXGame
 		bool mLoadingComplete;
 		std::vector<std::shared_ptr<Powerup>> mPowerups;
 		std::shared_ptr<Field> mActiveField;
+		BarManager& mBarManager;
+		std::shared_ptr<BallManager> mBallManager;
 
 		const int32_t mPowerupHeight = 2;
 		const float mPowerupWidth = 3.0f;
@@ -88,8 +83,5 @@ namespace DirectXGame
 			PowerupData((DirectX::XMFLOAT4)DirectX::Colors::PowderBlue, Powerup::PowerupType::SlowerBar),
 			PowerupData((DirectX::XMFLOAT4)DirectX::Colors::Purple, Powerup::PowerupType::FasterBar)
 		};
-
-		BarManager& mBarManager;
-		std::shared_ptr<BallManager> mBallManager;
 	};
 }

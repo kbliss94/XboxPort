@@ -181,33 +181,38 @@ namespace DirectXGame
 		return hitPosition;
 	}
 
+	void ChunkManager::GameOver()
+	{
+		mScoreManager.SetGameOver();
+	}
+
 	void ChunkManager::InitializeTriangleVertices()
 	{
 		vector<VertexPosition> vertices;
 		vertices.reserve(4);
 
-		//top left vertex
+		//Top left vertex
 		VertexPosition topLeft;
 		topLeft.Position.x = 0;
 		topLeft.Position.y = -38;
 		topLeft.Position.z = 0.0f;
 		topLeft.Position.w = 1.0f;
 
-		//top right vertex
+		//Top right vertex
 		VertexPosition topRight;
 		topRight.Position.x = 6;
 		topRight.Position.y = -38;
 		topRight.Position.z = 0.0f;
 		topRight.Position.w = 1.0f;
 
-		//bottom right vertex
+		//Bottom right vertex
 		VertexPosition bottomLeft;
 		bottomLeft.Position.x = 6;
 		bottomLeft.Position.y = -40;
 		bottomLeft.Position.z = 0.0f;
 		bottomLeft.Position.w = 1.0f;
 
-		//bottom left vertex
+		//Bottom left vertex
 		VertexPosition bottomRight;
 		bottomRight.Position.x = 0;
 		bottomRight.Position.y = -40;
@@ -244,21 +249,14 @@ namespace DirectXGame
 		{
 			for (uint32_t i = 1; i <= mNumChunks; ++i)
 			{
-				//mChunks.emplace_back(make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
 				mChunks.emplace(mChunks.begin(), make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
 
-
-				//if (i % 15 == 0)
 				if (i % 10 == 0)
 				{
 					colorIndex += 1;
-
-					//moving downwards to the next row
-					//position = XMFLOAT2(originalX - 6, (position.y - 3));
 					position = XMFLOAT2(originalX - mChunkWidth, (position.y - mChunkHeight));
 				}
 
-				//moving to the right to the next column
 				position = XMFLOAT2((position.x + mChunkWidth), position.y);
 			}
 		}

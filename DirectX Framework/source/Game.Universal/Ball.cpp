@@ -6,9 +6,10 @@ using namespace DX;
 
 namespace DirectXGame
 {
-	Ball::Ball(BallManager& ballManager, ChunkManager& chunkManager, BarManager& barManager, const Transform2D& transform, float radius, const XMFLOAT4& color, const XMFLOAT2& velocity, bool isSolid) :
+	Ball::Ball(BallManager& ballManager, ChunkManager& chunkManager, BarManager& barManager, const Transform2D& transform, float radius,
+		const XMFLOAT4& color, const XMFLOAT2& velocity) :
 		mBallManager(ballManager), mChunkManager(chunkManager), mTransform(transform), mRadius(radius),
-		mColor(color), mVelocity(velocity), mIsSolid(isSolid), mBarManager(barManager)
+		mColor(color), mVelocity(velocity), mBarManager(barManager)
 	{
 	}
 
@@ -26,11 +27,6 @@ namespace DirectXGame
 	{
 		return mRadius;
 	}
-
-	//void Ball::SetRadius(const float radius)
-	//{
-	//	mRadius = radius;
-	//}
 
 	const XMFLOAT4& Ball::Color() const
 	{
@@ -50,16 +46,6 @@ namespace DirectXGame
 	void Ball::SetVelocity(const XMFLOAT2& velocity)
 	{
 		mVelocity = velocity;
-	}
-
-	bool Ball::IsSolid() const
-	{
-		return mIsSolid;
-	}
-
-	void Ball::SetIsSolid(const bool isSolid)
-	{
-		mIsSolid = isSolid;
 	}
 
 	void Ball::Update(const StepTimer& timer)
@@ -102,27 +88,21 @@ namespace DirectXGame
 			updatedPosition.x = rightSide - mRadius;
 			hasCollidedWithField = true;
 		}
-		//checking to see if the ball has collided with the bar -30
-		//else if (position.y - mRadius <= -40)
-		//{
-		//	float barCollision = mBarManager.HandleBallCollision(position, mRadius, mVelocity.x);
-
-		//	if (barCollision != 0.0f)
-		//	{
-		//		mVelocity.y *= -1;
-		//		updatedPosition.y = barCollision;
-		//		hasCollidedWithField = true;
-		//	}
-		//}
-		else if (position.y - mRadius <= bottomSide)
+		else if (position.y - mRadius <= -40)
 		{
-			mVelocity.y *= -1;
-			updatedPosition.y = bottomSide + mRadius;
-			hasCollidedWithField = true;
+			//Checking to see if the ball has collided with the bar
+			float barCollision = mBarManager.HandleBallCollision(position, mRadius, mVelocity.x);
+
+			if (barCollision != 0.0f)
+			{
+				mVelocity.y *= -1;
+				updatedPosition.y = barCollision;
+				hasCollidedWithField = true;
+			}
 		}
-		//checking to see if the ball has collided with a chunk
 		else if (position.y + mRadius >= 22)
 		{
+			//Checking to see if the ball has collided with a chunk
 			float chunkCollision = mChunkManager.HandleBallCollision(position, mRadius);
 
 			if (chunkCollision != 0.0f)
@@ -131,8 +111,18 @@ namespace DirectXGame
 				updatedPosition.y = chunkCollision;
 				hasCollidedWithField = true;
 			}
+			else if (position.y + mRadius >= topSide)
+			{
+				mVelocity.y *= -1;
+				updatedPosition.y = topSide - mRadius;
+				hasCollidedWithField = true;
+			}
 		}
-
+		
+		if (position.y - mRadius <= -60)
+		{
+			mBallManager.BallOffscreen();
+		}
 
 		if (hasCollidedWithField)
 		{

@@ -14,7 +14,7 @@ namespace DirectXGame
 {
 	class BarManager;
 
-	class Bar
+	class Bar final
 	{
 	public:
 		Bar(BarManager& barManager, const DX::Transform2D& transform, float radius, const DirectX::XMFLOAT4& color, const DirectX::XMFLOAT2& velocity);

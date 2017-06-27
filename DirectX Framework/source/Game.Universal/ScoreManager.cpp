@@ -10,7 +10,7 @@ namespace DirectXGame
 	// Initializes D2D resources used for text rendering.
 	ScoreManager::ScoreManager(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 		DrawableGameComponent(deviceResources),
-		m_text(L""), mScore(0)
+		m_text(L""), mScore(0), mGameOver(false), mBallLaunched(false)
 	{
 		ZeroMemory(&m_textMetrics, sizeof(DWRITE_TEXT_METRICS));
 
@@ -49,9 +49,19 @@ namespace DirectXGame
 	{
 		UNREFERENCED_PARAMETER(timer);
 		// Update display text.
-		//uint32 fps = timer.GetFramesPerSecond();
-		//m_text = (fps > 0) ? std::to_wstring(fps) + L" FPS" : L" - FPS";
-		m_text = std::to_wstring(mScore);
+		if (!mGameOver && !mBallLaunched)
+		{
+			m_text = L"Space/A to launch ball";
+		}
+
+		if (!mGameOver && mBallLaunched)
+		{
+			m_text = std::to_wstring(mScore);
+		}
+		else if (mGameOver && mBallLaunched)
+		{
+			m_text = L"FINAL SCORE: " + std::to_wstring(mScore);
+		}
 
 		ComPtr<IDWriteTextLayout> textLayout;
 		DX::ThrowIfFailed(
@@ -59,10 +69,8 @@ namespace DirectXGame
 				m_text.c_str(),
 				(uint32)m_text.length(),
 				m_textFormat.Get(),
-				240.0f,
-				90.0f,
-				//240.0f, // Max width of the input text.
-				//50.0f, // Max height of the input text.
+				350.0f,	//Max width of the input text.
+				90.0f,	//Max height of the input text.
 				&textLayout
 			)
 		);
@@ -89,7 +97,7 @@ namespace DirectXGame
 
 		//Position in the top center
 		D2D1::Matrix3x2F screenTranslation = D2D1::Matrix3x2F::Translation(
-			logicalSize.Width - (m_textMetrics.layoutWidth * 3.3f),
+			logicalSize.Width - (m_textMetrics.layoutWidth * 2.7f),
 			logicalSize.Height - (m_textMetrics.height * 19.0f)
 		);
 
@@ -119,6 +127,21 @@ namespace DirectXGame
 	void ScoreManager::IncrementScore()
 	{
 		++mScore;
+	}
+
+	void ScoreManager::SetGameOver()
+	{
+		mGameOver = true;
+	}
+
+	const bool ScoreManager::IsGameOver()
+	{
+		return mGameOver;
+	}
+
+	void ScoreManager::SetBallLaunched()
+	{
+		mBallLaunched = true;
 	}
 
 	void ScoreManager::CreateDeviceDependentResources()
