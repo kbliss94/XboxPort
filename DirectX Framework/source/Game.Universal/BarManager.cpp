@@ -157,19 +157,62 @@ namespace DirectXGame
 		}
 	}
 
-	float BarManager::HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius)
+	float BarManager::HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius, float& ballXVelocity)
 	{
 		float hitPosition = 0.0f;
 
 		if ((ballPosition.y - ballRadius + 57) <= mBar->Position().y)
 		{
-			if (mBar->Position().x <= ballPosition.x && ballPosition.x <= (mBar->Position().x + (mBar->Width() * 2)))
+			if (mBar->Position().x <= (ballPosition.x - ballRadius) && (ballPosition.x + ballRadius) <= (mBar->Position().x + (mBar->Width() * 2)))
 			{
 				hitPosition = mBar->Position().y - 54;
+
+				if (ballPosition.x <= (mBar->Position().x + mBar->Width()) && ballXVelocity > 0)
+				{
+					ballXVelocity *= -1;
+				}
+				else if ((mBar->Position().x + mBar->Width()) < ballPosition.x && ballXVelocity < 0)
+				{
+					ballXVelocity *= -1;
+				}
 			}
 		}
 
 		return hitPosition;
+	}
+
+	bool BarManager::HandlePowerupCollision(const DirectX::XMFLOAT2& powerupPosition, const float& powerupWidth)
+	{
+		//if the center x value of the powerup is within the bar's x values, return true
+			//otherwise, return false
+		float powerupCenterX = powerupPosition.x + (powerupWidth / 2);
+
+		if (mBar->Position().x <= powerupCenterX && powerupCenterX <= (mBar->Position().x + mBarWidth))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	const std::int32_t BarManager::BarUpperY() const
+	{
+		return mBarY;
+	}
+
+	const std::int32_t BarManager::BarLowerY() const
+	{
+		return (mBarY - mBarHeight);
+	}
+
+	void BarManager::IncreaseBarVelocity()
+	{
+		mBar->SetVelocity(XMFLOAT2((mBar->Velocity().x + 30), mBar->Velocity().y));
+	}
+
+	void BarManager::DecreaseBarVelocity()
+	{
+		mBar->SetVelocity(XMFLOAT2((mBar->Velocity().x - 5), mBar->Velocity().y));
 	}
 
 	void BarManager::DrawBar(const Bar & bar)

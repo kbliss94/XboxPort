@@ -151,6 +151,66 @@ namespace DirectXGame
 		}
 	}
 
+	void BallManager::IncreaseBallVelocity()
+	{
+		shared_ptr<Ball> ball = mBalls[0];
+		XMFLOAT2 newVelocity = ball->Velocity();
+
+		if (ball->Velocity().x < 0)
+		{
+			newVelocity.x -= 5;
+			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x - 1), ball->Velocity().y));
+		}
+		else if (ball->Velocity().x > 0)
+		{
+			newVelocity.x += 5;
+			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x + 1), ball->Velocity().y));
+		}
+
+		if (ball->Velocity().y < 0)
+		{
+			newVelocity.y -= 5;
+			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y - 1)));
+		}
+		else if (ball->Velocity().y > 0)
+		{
+			newVelocity.y += 5;
+			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y + 1)));
+		}
+
+		ball->SetVelocity(newVelocity);
+	}
+
+	void BallManager::DecreaseBallVelocity()
+	{
+		shared_ptr<Ball> ball = mBalls[0];
+		XMFLOAT2 newVelocity = ball->Velocity();
+
+		if (ball->Velocity().x < 0)
+		{
+			newVelocity.x += 5;
+			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x - 1), ball->Velocity().y));
+		}
+		else if (ball->Velocity().x > 0)
+		{
+			newVelocity.x -= 5;
+			//ball->SetVelocity(XMFLOAT2((ball->Velocity.x + 1), ball->Velocity().y));
+		}
+
+		if (ball->Velocity().y < 0)
+		{
+			newVelocity.y += 5;
+			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y - 1)));
+		}
+		else if (ball->Velocity().y > 0)
+		{
+			newVelocity.y -= 5;
+			//ball->SetVelocity(XMFLOAT2(ball->Velocity.x, (ball->Velocity().y + 1)));
+		}
+
+		ball->SetVelocity(newVelocity);
+	}
+
 	void BallManager::DrawBall(const Ball& ball)
 	{
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
@@ -250,7 +310,7 @@ namespace DirectXGame
 
 	void BallManager::InitializeBalls()
 	{
-		const float rotation = .5;
+		const float rotation = 0.5f;
 		const float radius = 1.5f;
 		const XMFLOAT4 color(&Colors::CornflowerBlue[0]);
 		const XMFLOAT2 velocity(15, 15);

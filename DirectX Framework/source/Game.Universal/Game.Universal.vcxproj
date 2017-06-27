@@ -255,6 +255,9 @@
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="MoodySprite.h" />
+    <ClInclude Include="Powerup.h" />
+    <ClInclude Include="PowerupManager.h" />
+    <ClInclude Include="ScoreManager.h" />
     <ClInclude Include="SpriteDemoManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -277,6 +280,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MoodySprite.cpp" />
+    <ClCompile Include="Powerup.cpp" />
+    <ClCompile Include="PowerupManager.cpp" />
+    <ClCompile Include="ScoreManager.cpp" />
     <ClCompile Include="SpriteDemoManager.cpp" />
   </ItemGroup>
   <ItemGroup>

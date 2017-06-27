@@ -25,7 +25,14 @@ namespace DirectXGame
 		void MoveRight();
 		void MoveLeft();
 
-		float HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius);
+		float HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius, float& ballXVelocity);
+		bool HandlePowerupCollision(const DirectX::XMFLOAT2& powerupPosition, const float& powerupWidth);
+
+		const std::int32_t BarUpperY() const;
+		const std::int32_t BarLowerY() const;
+
+		void IncreaseBarVelocity();
+		void DecreaseBarVelocity();
 
 	private:
 		void InitializeTriangleVertices();
@@ -45,6 +52,10 @@ namespace DirectXGame
 		bool mLoadingComplete;
 		std::shared_ptr<Bar> mBar;
 		std::shared_ptr<Field> mActiveField;
+
+		const std::int32_t mBarY = 15;
+		const std::int32_t mBarHeight = 2;
+		const std::int32_t mBarWidth = 8;
 	};
 }
 

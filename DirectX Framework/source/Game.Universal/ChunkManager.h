@@ -9,11 +9,14 @@ namespace DirectXGame
 {
 	class Chunk;
 	class Field;
+	class ScoreManager;
+	class PowerupManager;
 
 	class ChunkManager final : public DX::DrawableGameComponent
 	{
 	public:
-		ChunkManager(const std::shared_ptr<DX::DeviceResources>& deviceResources, const std::shared_ptr<DX::Camera>& camera);
+		ChunkManager(const std::shared_ptr<DX::DeviceResources>& deviceResources, const std::shared_ptr<DX::Camera>& camera, 
+			ScoreManager& scoreManager, PowerupManager& powerupManager);
 
 		std::shared_ptr<Field> ActiveField() const;
 		void SetActiveField(const std::shared_ptr<Field>& field);
@@ -23,7 +26,7 @@ namespace DirectXGame
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
-		//returns true if a chunk has been hit by a ball & deleted
+		//returns the y position at which a chunk was hit & deleted (returns 0 if no chunk was hit)
 		float HandleBallCollision(const DirectX::XMFLOAT2& ballPosition, const float& ballRadius);
 
 	private:
@@ -58,5 +61,8 @@ namespace DirectXGame
 			(DirectX::XMFLOAT4)DirectX::Colors::LawnGreen,
 			(DirectX::XMFLOAT4)DirectX::Colors::LightSkyBlue
 		};
+
+		ScoreManager& mScoreManager;
+		PowerupManager& mPowerupManager;
 	};
 }

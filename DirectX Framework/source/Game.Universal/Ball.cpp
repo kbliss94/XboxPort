@@ -105,7 +105,7 @@ namespace DirectXGame
 		//checking to see if the ball has collided with the bar -30
 		//else if (position.y - mRadius <= -40)
 		//{
-		//	float barCollision = mBarManager.HandleBallCollision(position, mRadius);
+		//	float barCollision = mBarManager.HandleBallCollision(position, mRadius, mVelocity.x);
 
 		//	if (barCollision != 0.0f)
 		//	{

@@ -8,28 +8,28 @@ using namespace DX;
 
 namespace DirectXGame
 {
-	const uint32_t ChunkManager::CircleResolution = 32;
-	const uint32_t ChunkManager::SolidCircleVertexCount = (ChunkManager::CircleResolution + 1) * 2;
+	const uint32_t PowerupManager::CircleResolution = 32;
+	const uint32_t PowerupManager::SolidCircleVertexCount = (PowerupManager::CircleResolution + 1) * 2;
 
-	ChunkManager::ChunkManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, 
-		ScoreManager& scoreManager, PowerupManager& powerupManager) :
+	PowerupManager::PowerupManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera,
+		BarManager& barManager) :
 		DrawableGameComponent(deviceResources, camera), mLoadingComplete(false), 
-		mScoreManager(scoreManager), mPowerupManager(powerupManager)
+		mBarManager(barManager)
 	{
 		CreateDeviceDependentResources();
 	}
 
-	std::shared_ptr<Field> ChunkManager::ActiveField() const
+	std::shared_ptr<Field> PowerupManager::ActiveField() const
 	{
-		return mActiveField;
+	return mActiveField;
 	}
 
-	void ChunkManager::SetActiveField(const shared_ptr<Field>& field)
+	void PowerupManager::SetActiveField(const shared_ptr<Field>& field)
 	{
 		mActiveField = field;
 	}
 
-	void ChunkManager::CreateDeviceDependentResources()
+	void PowerupManager::CreateDeviceDependentResources()
 	{
 		auto loadVSTask = ReadDataAsync(L"ShapeRendererVS.cso");
 		auto loadPSTask = ReadDataAsync(L"ShapeRendererPS.cso");
@@ -89,7 +89,7 @@ namespace DirectXGame
 
 		auto createVerticesAndBallsTask = (createPSTask && createVSTask).then([this]() {
 			InitializeTriangleVertices();
-			InitializeChunks();
+			//InitializePowerup();
 		});
 
 		// Once the cube is loaded, the object is ready to be rendered.
@@ -98,7 +98,7 @@ namespace DirectXGame
 		});
 	}
 
-	void ChunkManager::ReleaseDeviceDependentResources()
+	void PowerupManager::ReleaseDeviceDependentResources()
 	{
 		mLoadingComplete = false;
 		mVertexShader.Reset();
@@ -109,15 +109,76 @@ namespace DirectXGame
 		mPSCBufferPerObject.Reset();
 	}
 
-	void ChunkManager::Update(const StepTimer& timer)
+	void PowerupManager::Update(const StepTimer& timer)
 	{
-		for (const auto& chunk : mChunks)
+		for (const auto& powerup : mPowerups)
 		{
-			chunk->Update(timer);
+			powerup->Update(timer);
 		}
+
+		for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
+		{
+			//if (powerup y + powerup height) is within bar y, check for collision
+			if (((*it)->Position().y + mPowerupHeight) <= mBarManager.BarUpperY())
+			{
+				if (mBarManager.HandlePowerupCollision((*it)->Position(), mPowerupWidth))
+				{
+					if (!(*it)->Activated())
+					{
+						(*it)->ActivatePowerup();
+
+						//trigger the appropriate powerup effect
+						if ((*it)->Type() == Powerup::FasterBar)
+						{
+							mBarManager.IncreaseBarVelocity();
+						}
+						else if ((*it)->Type() == Powerup::SlowerBar)
+						{
+							mBarManager.DecreaseBarVelocity();
+						}
+						else if ((*it)->Type() == Powerup::FasterBall)
+						{
+							mBallManager->IncreaseBallVelocity();
+						}
+						else if ((*it)->Type() == Powerup::SlowerBall)
+						{
+							mBallManager->DecreaseBallVelocity();
+						}
+					}
+
+					//trigger the appropriate powerup effect
+					//if (mPowerups.size() != 1)
+					//{
+					//	mPowerups.erase(it);
+					//}
+				}
+			}
+		}
+
+		for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
+		{
+			//if powerup y is within bottom of screen(/bar), delete the chunk 
+			//if ((*it)->Position().y <= (mBarManager.BarLowerY()))
+			if ((*it)->Position().y <= 0)
+			{
+				(*it)->ActivatePowerup();
+				//if (mPowerups.size() != 1)
+				//{
+				//	mPowerups.erase(it);
+				//}
+			}
+		}
+
+		//for (const auto& powerup : mPowerups)
+		//{
+		//	if (!(powerup->Activated()))
+		//	{
+		//		powerup->Update(timer);
+		//	}
+		//}
 	}
 
-	void ChunkManager::Render(const StepTimer & timer)
+	void PowerupManager::Render(const StepTimer & timer)
 	{
 		UNREFERENCED_PARAMETER(timer);
 
@@ -136,13 +197,13 @@ namespace DirectXGame
 		direct3DDeviceContext->VSSetConstantBuffers(0, 1, mVSCBufferPerObject.GetAddressOf());
 		direct3DDeviceContext->PSSetConstantBuffers(0, 1, mPSCBufferPerObject.GetAddressOf());
 
-		for (const auto& chunk : mChunks)
+		for (const auto& powerup : mPowerups)
 		{
-			DrawChunk(*chunk);
+			DrawPowerup(*powerup);
 		}
 	}
 
-	void ChunkManager::DrawChunk(const Chunk & chunk)
+	void PowerupManager::DrawPowerup(const Powerup & powerup)
 	{
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
 		direct3DDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -151,37 +212,74 @@ namespace DirectXGame
 		static const UINT offset = 0;
 		direct3DDeviceContext->IASetVertexBuffers(0, 1, mTriangleVertexBuffer.GetAddressOf(), &stride, &offset);
 
-		const XMMATRIX wvp = XMMatrixTranspose(XMMatrixScaling(chunk.Radius(), chunk.Radius(), chunk.Radius()) * chunk.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
+		const XMMATRIX wvp = XMMatrixTranspose(XMMatrixScaling(powerup.Radius(), powerup.Radius(), powerup.Radius()) * powerup.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
 		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, reinterpret_cast<const float*>(wvp.r), 0, 0);
 
-		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &chunk.Color(), 0, 0);
+		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &powerup.Color(), 0, 0);
 
 		direct3DDeviceContext->Draw(SolidCircleVertexCount, 0);
 	}
 
-	float ChunkManager::HandleBallCollision(const XMFLOAT2& ballPosition, const float& ballRadius)
+	//float PowerupManager::HandleBarCollision(const XMFLOAT2& ballPosition, const float& ballRadius)
+	//{
+	//	UNREFERENCED_PARAMETER(ballPosition);
+	//	UNREFERENCED_PARAMETER(ballRadius);
+
+	//	//should prob have a public enum in Powerup so you can check which powerup was caught
+
+	//	return 0.0f;
+	//	//float hitPosition = 0.0f;
+
+	//	//for (auto it = mPowerups.begin(); it != mPowerups.end(); ++it)
+	//	//{
+	//	//	if ((ballPosition.y + ballRadius + 57) >= ((*it)->Position().y - mChunkHeight))
+	//	//	{
+	//	//		if (((*it)->Position().x) <= ballPosition.x && ballPosition.x <= ((*it)->Position().x + mChunkWidth))
+	//	//		{
+	//	//			hitPosition = ((*it)->Position().y - mChunkHeight) - 58;
+	//	//			mPowerups.erase(it);
+	//	//			break;
+	//	//		}
+	//	//	}
+	//	//}
+
+	//	//return hitPosition;
+	//}
+
+	void PowerupManager::SetBallManager(std::shared_ptr<BallManager> ballManager)
 	{
-		float hitPosition = 0.0f;
-
-		for (auto it = mChunks.begin(); it != mChunks.end(); ++it)
-		{
-			if ((ballPosition.y + ballRadius + 57) >= ((*it)->Position().y - mChunkHeight))
-			{
-				if (((*it)->Position().x) <= ballPosition.x && ballPosition.x <= ((*it)->Position().x + mChunkWidth))
-				{
-					hitPosition = ((*it)->Position().y - mChunkHeight) - 58;
-					mPowerupManager.PowerupSpawnCheck(XMFLOAT2(((*it)->Position().x + 2), ((*it)->Position().y - mChunkHeight)));
-					mChunks.erase(it);
-					mScoreManager.IncrementScore();
-					break;
-				}
-			}
-		}
-
-		return hitPosition;
+		mBallManager = ballManager;
 	}
 
-	void ChunkManager::InitializeTriangleVertices()
+	void PowerupManager::PowerupSpawnCheck(const XMFLOAT2& chunkPosition)
+	{
+		//probability check to see if a powerup should be spawned (.25 chance)
+		//random_device device;
+		//default_random_engine generator(device());
+		//uniform_int_distribution<uint32_t> spawnDistribution(0, 3);
+
+		//if (spawnDistribution(generator) == 0)
+		//{
+		//	SpawnPowerup(chunkPosition);
+		//}
+
+		SpawnPowerup(chunkPosition);
+	}
+
+	void PowerupManager::SpawnPowerup(const XMFLOAT2& chunkPosition)
+	{
+		//randomly selecting powerup effect (& associated color) here
+		random_device device;
+		default_random_engine generator(device());
+		uniform_int_distribution<uint32_t> powerupDistribution(0, 3);
+
+		//uint32_t powerupSelection = powerupDistribution(generator);
+		uint32_t powerupSelection = 0;
+
+		InitializePowerup(chunkPosition, mPossiblePowerups[powerupSelection].Type, mPossiblePowerups[powerupSelection].Color);
+	}
+
+	void PowerupManager::InitializeTriangleVertices()
 	{
 		vector<VertexPosition> vertices;
 		vertices.reserve(4);
@@ -195,14 +293,14 @@ namespace DirectXGame
 
 		//top right vertex
 		VertexPosition topRight;
-		topRight.Position.x = 6;
+		topRight.Position.x = 3;
 		topRight.Position.y = -38;
 		topRight.Position.z = 0.0f;
 		topRight.Position.w = 1.0f;
 
 		//bottom right vertex
 		VertexPosition bottomLeft;
-		bottomLeft.Position.x = 6;
+		bottomLeft.Position.x = 3;
 		bottomLeft.Position.y = -40;
 		bottomLeft.Position.z = 0.0f;
 		bottomLeft.Position.w = 1.0f;
@@ -231,36 +329,14 @@ namespace DirectXGame
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexSubResourceData, mTriangleVertexBuffer.ReleaseAndGetAddressOf()));
 	}
 
-	void ChunkManager::InitializeChunks()
+	void PowerupManager::InitializePowerup(const XMFLOAT2& position, Powerup::PowerupType type, const DirectX::XMFLOAT4& color)
 	{
 		const float rotation = 0.0f;
 		const float radius = 1.5f;
-		const XMFLOAT2 velocity(0, 0);
-		float originalX = -45.0f;
-		XMFLOAT2 position(originalX, 97);
-		int colorIndex = 0;
-
-		if (mChunks.size() < mNumChunks)
-		{
-			for (uint32_t i = 1; i <= mNumChunks; ++i)
-			{
-				//mChunks.emplace_back(make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
-				mChunks.emplace(mChunks.begin(), make_shared<Chunk>(*this, position, radius, mChunkColors[colorIndex], velocity));
-
-
-				//if (i % 15 == 0)
-				if (i % 10 == 0)
-				{
-					colorIndex += 1;
-
-					//moving downwards to the next row
-					//position = XMFLOAT2(originalX - 6, (position.y - 3));
-					position = XMFLOAT2(originalX - mChunkWidth, (position.y - mChunkHeight));
-				}
-
-				//moving to the right to the next column
-				position = XMFLOAT2((position.x + mChunkWidth), position.y);
-			}
-		}
+		const XMFLOAT2 velocity(0, -10);
+		//int colorIndex = 0;
+		
+		//mPowerups.emplace_back(make_shared<Powerup>(*this, position, radius, mChunkColors[colorIndex], velocity));
+		mPowerups.emplace_back(make_shared<Powerup>(*this, position, radius, color, velocity, type));
 	}
 }

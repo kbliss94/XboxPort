@@ -41,17 +41,27 @@ namespace DirectXGame
 		auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
 		mComponents.push_back(fieldManager);
 
-		///////////
-		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera);
-		chunkManager->SetActiveField(fieldManager->ActiveField());
-		mComponents.push_back(chunkManager);
+		auto scoreManager = make_shared<ScoreManager>(mDeviceResources);
+		mComponents.push_back(scoreManager);
 
+		///////////
 		mBarManager = make_shared<BarManager>(mDeviceResources, camera);
 		mBarManager->SetActiveField(fieldManager->ActiveField());
+
+		auto powerupManager = make_shared<PowerupManager>(mDeviceResources, camera, *mBarManager);
+		powerupManager->SetActiveField(fieldManager->ActiveField());
+		mComponents.push_back(powerupManager);
+
+		auto chunkManager = make_shared<ChunkManager>(mDeviceResources, camera, *scoreManager, *powerupManager);
+		chunkManager->SetActiveField(fieldManager->ActiveField());
+		mComponents.push_back(chunkManager);
 
 		auto ballManager = make_shared<BallManager>(mDeviceResources, camera, *chunkManager, *mBarManager);
 		ballManager->SetActiveField(fieldManager->ActiveField());
 		mComponents.push_back(ballManager);
+
+		powerupManager->SetBallManager(ballManager);
+
 		//////////
 
 		mTimer.SetFixedTimeStep(true);

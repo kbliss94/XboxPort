@@ -56,3 +56,7 @@
 #include "BarManager.h"
 #include "Chunk.h"
 #include "ChunkManager.h"
+
+#include "ScoreManager.h"
+#include "Powerup.h"
+#include "PowerupManager.h"

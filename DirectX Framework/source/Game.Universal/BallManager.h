@@ -24,6 +24,9 @@ namespace DirectXGame
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
+		void IncreaseBallVelocity();
+		void DecreaseBallVelocity();
+
 	private:
 		void InitializeLineVertices();
 		void InitializeTriangleVertices();
